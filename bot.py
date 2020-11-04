@@ -33,10 +33,8 @@ async def handle_message(msg: types.Message):
 
 def trasform(msg):
     if '\n' in msg.text:
-        print(1)
         text = msg.text.strip().split('\n')
     else:
-        print(2)
         text = msg.text.strip().split(' ')
 
     max_len = max(map(len, text))
