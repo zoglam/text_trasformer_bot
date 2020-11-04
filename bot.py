@@ -1,8 +1,9 @@
 from aiogram import Bot, types
-from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
+from aiogram.dispatcher import Dispatcher
 
-from config import *
+from config import BOT_TOKEN
+
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
@@ -11,11 +12,17 @@ dp = Dispatcher(bot)
 @dp.message_handler(commands=["start"])
 async def start_command(msg: types.Message):
     start_msg = '*Change horizontal text to vertical*\nEnter sentence:'
-    await msg.reply(start_msg)
+    await msg.reply(start_msg, parse_mode="markdown")
+
+
+@dp.message_handler(commands=["info"])
+async def start_command(msg: types.Message):
+    start_msg = 'Write text\nGet```\nt\ne\nx\nt```'
+    await msg.reply(start_msg, parse_mode="markdown")
 
 
 @dp.message_handler()
-async def main(msg: types.Message):
+async def handle_message(msg: types.Message):
     output_msg = f'```\n{trasform(msg)}```'
     await bot.send_message(
         msg.from_user.id,
@@ -25,15 +32,21 @@ async def main(msg: types.Message):
 
 
 def trasform(msg):
-    words = msg.text.strip().split(' ')
-    max_len = max(map(len, words))
+    if '\n' in msg.text:
+        print(1)
+        text = msg.text.strip().split('\n')
+    else:
+        print(2)
+        text = msg.text.strip().split(' ')
 
-    arr = [[' ' for j in range(len(words))] for i in range(max_len)]
+    max_len = max(map(len, text))
+
+    arr = [[' ' for j in range(len(text))] for i in range(max_len)]
 
     for i in range(max_len):
-        for j in range(len(words)):
+        for j in range(len(text)):
             try:
-                output_msg[i][j] = words[j][i]
+                arr[i][j] = text[j][i]
             except IndexError:
                 continue
 
