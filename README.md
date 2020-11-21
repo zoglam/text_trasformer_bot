@@ -1,5 +1,5 @@
 # text_trasformer_bot
-Сan collect text into any variations forms
+Changes the direction of the text
 
 Install requirements from file
 ```bash
