@@ -28,12 +28,12 @@ async def handle_message(msg: types.Message):
 
     global transform_obj
     transform_obj = Transform(msg.text)
-    transform_obj.vertical()
+    transform_obj.line_by_line()
 
     await msg.answer(
         str(transform_obj),
         parse_mode="markdown",
-        reply_markup=Keyboard.inline_option_picker('Vertical')
+        reply_markup=Keyboard.inline_option_picker('Line_by_line')
     )
 
 

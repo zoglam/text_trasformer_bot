@@ -12,7 +12,7 @@ class Transform(object):
 
     @classmethod
     def public_funcs(cls) -> tuple:
-        return ('Vertical', 'Square')
+        return ('Vertical', 'Square', 'Line_by_line')
 
     def _telegram_format(func):
         def wrapper(self):
@@ -23,6 +23,11 @@ class Transform(object):
     @property
     def _words_count(self) -> int:
         return len(self.words_list)
+
+    
+    @_telegram_format
+    def line_by_line(self) -> list:
+        return self.words_list
 
     @_telegram_format
     def vertical(self) -> list:
