@@ -4,6 +4,8 @@ from aiogram.dispatcher import Dispatcher
 
 from config import BOT_TOKEN
 
+from transform import Transform
+from keyboards import Keyboard
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
@@ -23,33 +25,28 @@ async def start_command(msg: types.Message):
 
 @dp.message_handler()
 async def handle_message(msg: types.Message):
-    output_msg = f'```\n{trasform(msg)}```'
-    await bot.send_message(
-        msg.from_user.id,
-        output_msg,
-        parse_mode="markdown"
+
+    global transform_obj
+    transform_obj = Transform(msg.text)
+    transform_obj.vertical()
+
+    await msg.answer(
+        str(transform_obj),
+        parse_mode="markdown",
+        reply_markup=Keyboard.inline_option_picker('Vertical')
     )
 
 
-def trasform(msg):
-    if '\n' in msg.text:
-        text = msg.text.strip().split('\n')
-    else:
-        text = msg.text.strip().split(' ')
-
-    max_len = max(map(len, text))
-
-    arr = [[' ' for j in range(len(text))] for i in range(max_len)]
-
-    for i in range(max_len):
-        for j in range(len(text)):
-            try:
-                arr[i][j] = text[j][i]
-            except IndexError:
-                continue
-
-    return '\n'.join([' '.join(x) for x in arr])
-
+@dp.callback_query_handler()
+async def answer(call):
+    transform_obj.__getattribute__(call['data'].lower())()
+    await bot.edit_message_text(
+        chat_id=call['message']['chat']['id'],
+        message_id=call['message']['message_id'],
+        text=str(transform_obj),
+        parse_mode="markdown",
+        reply_markup=Keyboard.inline_option_picker(call['data'])
+    )
 
 if __name__ == '__main__':
     executor.start_polling(dp)
