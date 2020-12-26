@@ -11,7 +11,7 @@ For tests you can start the bot from CLI:
 python3 bot.py
 ```
 
-#Docker
+# Docker
 build
 ```bash
 docker build -t text_trasformer_bot .
