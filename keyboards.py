@@ -6,7 +6,7 @@ from transform import Transform
 class Keyboard(object):
 
     @staticmethod
-    def inline_option_picker(using_method=None) -> InlineKeyboardMarkup:
+    def inline_option_picker(using_method:str=None) -> InlineKeyboardMarkup:
 
         options = Transform.public_funcs()
         buttons = (InlineKeyboardButton(text=option, callback_data=option)

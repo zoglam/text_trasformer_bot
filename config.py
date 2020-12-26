@@ -1,1 +1,1 @@
-BOT_TOKEN = "your token must be here"
+BOT_TOKEN = "1305729785:AAGBf52PLW0c55kolZ-Zd6PCkxfrapu508s"

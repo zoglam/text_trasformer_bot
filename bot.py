@@ -9,6 +9,7 @@ from keyboards import Keyboard
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
+transform = Transform()
 
 
 @dp.message_handler(commands=["start"])
@@ -25,13 +26,10 @@ async def start_command(msg: types.Message):
 
 @dp.message_handler()
 async def handle_message(msg: types.Message):
-
-    global transform_obj
-    transform_obj = Transform(msg.text)
-    transform_obj.line_by_line()
-
+    transform.handle_new_message(msg.text)
+    transform.line_by_line()
     await msg.answer(
-        str(transform_obj),
+        str(transform),
         parse_mode="markdown",
         reply_markup=Keyboard.inline_option_picker('Line_by_line')
     )
@@ -39,14 +37,20 @@ async def handle_message(msg: types.Message):
 
 @dp.callback_query_handler()
 async def answer(call):
-    transform_obj.__getattribute__(call['data'].lower())()
+    transform.edit_output_message(
+        func=call['data'],
+        chat_id=call['message']['chat']['id'],
+        msg_id=call['message']['message_id'],
+        msg_text=call['message']['text']
+    )
     await bot.edit_message_text(
         chat_id=call['message']['chat']['id'],
         message_id=call['message']['message_id'],
-        text=str(transform_obj),
+        text=str(transform),
         parse_mode="markdown",
         reply_markup=Keyboard.inline_option_picker(call['data'])
     )
 
 if __name__ == '__main__':
     executor.start_polling(dp)
+    transform.db.conn.close()

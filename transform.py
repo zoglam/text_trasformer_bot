@@ -1,20 +1,24 @@
 import re
 
+from sqlite.database import DB
+
 
 class Transform(object):
 
-    def __init__(self, msg_text: str):
-        self.words_list = re.findall(r'[a-zа-я0-9]+', msg_text.lower())
-        self.output_message = None
+    output_message = None
+    words_list = None
+
+    def __init__(self):
+        self.db = DB()
 
     def __str__(self) -> str:
         return self.output_message
 
-    @classmethod
-    def public_funcs(cls) -> tuple:
+    @staticmethod
+    def public_funcs() -> tuple:
         return ('Vertical', 'Square', 'Line_by_line')
 
-    def _telegram_format(func):
+    def _monospace_format(func):
         def wrapper(self):
             result = '\n'.join([' '.join(l) for l in func(self)])
             self.output_message = f'```\n{result}```'
@@ -24,12 +28,29 @@ class Transform(object):
     def _words_count(self) -> int:
         return len(self.words_list)
 
-    
-    @_telegram_format
+    def handle_new_message(self, msg_text: str):
+        self.words_list = re.findall(r'[a-zа-я0-9]+', msg_text.lower())
+
+    def edit_output_message(self, func: str, chat_id, msg_id, msg_text) -> None:
+        rows = self.db.get(table='messages', chat_id=chat_id, msg_id=msg_id)
+        if not rows:
+            msg_text = msg_text.replace(' ', '').replace('\n', ' ')
+            self.db.insert(
+                table='messages',
+                chat_id=chat_id,
+                msg_id=msg_id,
+                msg_text=msg_text
+            )
+        else:
+            _, _, msg_text = rows[0]
+        self.handle_new_message(msg_text)
+        self.__getattribute__(func.lower())()
+
+    @_monospace_format
     def line_by_line(self) -> list:
         return self.words_list
 
-    @_telegram_format
+    @_monospace_format
     def vertical(self) -> list:
         column_size = max(len(w) for w in self.words_list)
         output_arr = [[' ']*self._words_count for _ in range(column_size)]
@@ -40,7 +61,7 @@ class Transform(object):
 
         return output_arr
 
-    @_telegram_format
+    @_monospace_format
     def square(self) -> list:
         text_string = '*'.join(self.words_list)
         max_len = len(text_string) + (4 - len(text_string) % 4)
